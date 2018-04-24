@@ -67,7 +67,7 @@ resource "aws_security_group_rule" "egress-port_22" {
   protocol    = "tcp"
   cidr_blocks = ["0.0.0.0/0"]
 
-  security_group_id = "${aws_security_group.drone_ci.id}"
+  security_group_id = "${aws_security_group.bastion.id}"
 }
 
 #############
@@ -90,7 +90,9 @@ resource "aws_instance" "k8Bastion" {
   key_name        = "${var.excella_aws_pubkey_name}"
 
   provisioner "file" {
-    # source = "docker-compose.yml"  # destination = "/home/centos/docker-compose.yml"
+    source = "test.sh"
+
+    destination = "/home/centos/test.sh"
 
     connection {
       type        = "ssh"
