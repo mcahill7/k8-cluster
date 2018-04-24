@@ -96,8 +96,9 @@ resource "aws_instance" "k8Bastion" {
 
     connection {
       type        = "ssh"
-      user        = "centos"
+      user        = "ec2-user"
       private_key = "${file("~/.ssh/${var.excella_aws_pubkey_name}")}"
+      agent       = true
     }
   }
 }
@@ -109,9 +110,10 @@ resource "null_resource" "provision" {
 
   connection {
     type        = "ssh"
-    user        = "centos"
+    user        = "ec2-user"
     private_key = "${file("~/.ssh/${var.excella_aws_pubkey_name}")}"
-    host        = "${aws_instance.k8bastion.public_ip}"
+    host        = "${aws_instance.k8Bastion.public_ip}"
+    agent       = true
   }
 
   provisioner "remote-exec" {
