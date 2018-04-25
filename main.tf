@@ -50,6 +50,16 @@ resource "aws_security_group_rule" "egress-port_80" {
   security_group_id = "${aws_security_group.bastion.id}"
 }
 
+resource "aws_security_group_rule" "egress-port_8080" {
+  type        = "egress"
+  from_port   = 8080
+  to_port     = 8080
+  protocol    = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+
+  security_group_id = "${aws_security_group.bastion.id}"
+}
+
 resource "aws_security_group_rule" "egress-port_443" {
   type        = "egress"
   from_port   = 443
@@ -92,7 +102,7 @@ resource "aws_instance" "k8Bastion" {
   provisioner "file" {
     source = "test.sh"
 
-    destination = "/home/centos/test.sh"
+    destination = "/home/ec2-user/test.sh"
 
     connection {
       type        = "ssh"
@@ -122,7 +132,7 @@ resource "null_resource" "provision" {
       "sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo",
       "sudo yum install -y epel-release",
       "sudo yum install -y python-pip",
-      "sudo pip install --upgrade pip",
+      "sudo yum install -y docker",
       "sudo pip install docker-compose",
       "sudo yum upgrade python* -y",
       "wget -O kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl",
@@ -132,6 +142,15 @@ resource "null_resource" "provision" {
       "chmod +x ./kops",
       "sudo mv ./kops /usr/local/bin/",
       "pip install awscli --upgrade --user",
+      "curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh",
+      "chmod 700 get_helm.sh",
+      "./get_helm.sh",
+      "sudo wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat-stable/jenkins.repo",
+      "sudo rpm --import https://jenkins-ci.org/redhat/jenkins-ci.org.key",
+      "sudo yum install jenkins -y",
+      "sudo yum install java -y",
+      "sudo service jenkins start",
+      "sudo chkconfig --add jenkins",
     ]
   }
 }
